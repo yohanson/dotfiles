@@ -1,0 +1,31 @@
+XTerm*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*
+
+XTerm*background: black
+XTerm*foreground: grey
+! Tango Color Scheme (Again)
+XTerm*color0: #2e3436
+XTerm*color1: #cc0000
+XTerm*color2: #4e9a06
+XTerm*color3: #c4a000
+XTerm*color4: #3465a4
+XTerm*color5: #75507b
+XTerm*color6: #0b939b
+XTerm*color7: #d3d7cf
+XTerm*color8: #555753
+XTerm*color9: #ef2929
+XTerm*color10: #8ae234
+XTerm*color11: #fce94f
+XTerm*color12: #729fcf
+XTerm*color13: #ad7fa8
+XTerm*color14: #00f5e9
+XTerm*color15: #eeeeec
+XTerm*pointerColor: white
+
+!------------ xterm:
+xterm*metaSendsEscape: true
+XTerm*VT100.charClass: 33:48,35:48,37:48,42:48,45-47:48,64:48,95:48,126:48
+XTerm*VT100.cutNewLine: false
+XTerm*VT100.cutToBeginningOfLine: false
+XTerm*showBlinkAsBold: True
+XTerm*utf8Title: true
+XTerm*saveLines: 10000
