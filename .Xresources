@@ -1,5 +1,13 @@
-XTerm*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*
+! Xft ----------------
+!Xft.autohint:  1
+Xft.lcdfilter: none
+Xft.hintstyle: hintfull
+Xft.hinting:   1
+Xft.antialias: 1
+Xft.dpi:       96
 
+
+!------------ xterm:
 XTerm*background: black
 XTerm*foreground: grey
 ! Tango Color Scheme (Again)
@@ -21,7 +29,14 @@ XTerm*color14: #00f5e9
 XTerm*color15: #eeeeec
 XTerm*pointerColor: white
 
-!------------ xterm:
+!XTerm*renderFont: true
+XTerm*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*
+!XTerm*font: -*-terminuspowerlinelsh-*-*-*-*-*-*-*-*-*-*-*-*
+!XTerm*font: *-iso10646-*
+!xterm*faceName: DejaVu Sans Mono
+!xterm*faceName: Terminess Powerline
+!xterm*faceSize: 14
+xterm*utf8: 2
 xterm*metaSendsEscape: true
 XTerm*VT100.charClass: 33:48,35:48,37:48,42:48,45-47:48,64:48,95:48,126:48
 XTerm*VT100.cutNewLine: false
@@ -29,3 +44,36 @@ XTerm*VT100.cutToBeginningOfLine: false
 XTerm*showBlinkAsBold: True
 XTerm*utf8Title: true
 XTerm*saveLines: 10000
+
+!-------------- Rxvt:
+Rxvt*background: black
+Rxvt*foreground: grey
+! Tango Color Scheme (Again)
+Rxvt*color0: #2e3436
+Rxvt*color1: #cc0000
+Rxvt*color2: #4e9a06
+Rxvt*color3: #c4a000
+Rxvt*color4: #3465a4
+Rxvt*color5: #75507b
+Rxvt*color6: #0b939b
+Rxvt*color7: #d3d7cf
+Rxvt*color8: #555753
+Rxvt*color9: #ef2929
+Rxvt*color10: #8ae234
+Rxvt*color11: #fce94f
+Rxvt*color12: #729fcf
+Rxvt*color13: #ad7fa8
+Rxvt*color14: #00f5e9
+Rxvt*color15: #eeeeec
+
+!------------ Rxvt:
+Rxvt*font: xft:Terminess Powerline:pixelsize=18, xft:PT Mono:antialias=false, xft:DejaVu Sans, xft:Symbola monospacified for Terminus (TTF)
+Rxvt*boldFont: xft:Terminess Powerline:pixelsize=18:Bold, xft:PT Mono:antialias=false:Bold, xft:DejaVu Sans:Bold, xft:Symbola monospacified for Terminus (TTF):Bold
+Rxvt*italicFont: xft:DejaVu Sans Mono:Italic
+!Rxvt*font: -*-terminesspowerline-medium-r-normal--18-*-*-*-*-*-iso10646-1, xft:DefaVu Sans:pixelsize=18
+!Rxvt*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*, xft:Inconsolata for Powerline, xft:DefaVu Sans:size=14
+
+Rxvt*scrollBar: false
+Rxvt*saveLines: 10000
+Rxvt*cutchars: " `'&()*,;<=>?[]^{|}\"\\"
+Rxvt.cursorBlink: true
