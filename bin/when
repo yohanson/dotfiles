@@ -1,0 +1,69 @@
+#!/bin/bash
+
+clock_to_min()
+{
+    hour=$(echo $1 | cut -d: -f1)
+    min=$(echo $1 | cut -s -d: -f2)
+    totalmin=$(( 60*$hour + $min ))
+    echo $totalmin
+}
+
+min_to_clock()
+{
+    #echo "minutes $1" >&2
+    hour=$(( $1 / 60 ))
+    min=$(( $1 % 60 ))
+    [ $1 -lt 0 ] && SIGN="-" || SIGN="+"
+    [ $min -lt 0 ] && let "min=-min"
+    [ $min -lt 10 ] && min="0$min"
+    [ $hour -lt 0 ] && let "hour=-hour"
+    [ $hour -lt 10 ] && hour="0$hour"
+    echo "${SIGN}$hour:$min"
+}
+
+DIR=$(dirname $0)
+TIMEZONE=$(date +%:z)
+TIMEZONE_MIN=$(clock_to_min $TIMEZONE)
+WORKDAYLENGTH=9:00
+
+if [ `date +%w` -eq 5 ]; then # friday
+    WORKDAYLENGTH=7:30
+else
+   MONTH=$(date +%-m)
+   YEAR=$(date +%Y)
+   CALEND_YEAR=$(cat $DIR/calend.json | grep -o '"'$YEAR'":.*[^}]}}}')
+   if [ -z "$CALEND_YEAR" ]; then
+       wget -q -O $DIR/calend.json http://basicdata.ru/api/json/calend/
+       CALEND_YEAR=$(cat $DIR/calend.json | grep -o '"'$YEAR'":.*[^}]}}}')
+   fi
+   DAYTYPE=$(echo "$CALEND_YEAR" | grep -o '"'$MONTH'":{"[0-9].*[^}]}}' | grep -o '{.*}' | tr , '\n' | tr -d {}\" | awk -F: '$1==strftime("%-d"){print $3}')
+   if [[ "$DAYTYPE" == "3" ]]; then
+        WORKDAYLENGTH=8:00
+   fi
+fi
+
+WORKDAYLENGTH_MIN=$(clock_to_min $WORKDAYLENGTH)
+OFFSET_AT_THE_END_MIN=$(( $TIMEZONE_MIN - $WORKDAYLENGTH_MIN ))
+OFFSET_AT_THE_END_COMMIT_MIN=$(( $TIMEZONE_MIN - $WORKDAYLENGTH_MIN + 15 ))
+OFFSET_AT_THE_END=$(min_to_clock $OFFSET_AT_THE_END_MIN)
+OFFSET_AT_THE_END_COMMIT=$(min_to_clock $OFFSET_AT_THE_END_COMMIT_MIN)
+
+entertime=$(cat $DIR/activity.log | grep "`date +%Y-%m-%d` \(0[6-9]\|1[0-6]\)" | grep Unblank | head -1 | awk '{print $2}' | sed -r 's/:[0-9]+\s*\+[0-9:]+//')
+
+committime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%Y%m%d%H%M)
+shortcommittime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%R)
+
+quittime=$(date --date="$entertime $OFFSET_AT_THE_END" +%Y%m%d%H%M)
+shortquittime=$(date --date="$entertime $OFFSET_AT_THE_END" +%R)
+
+echo "Entered $entertime"
+echo "Commit  $shortcommittime"
+echo "Go home $shortquittime"
+if [ "`atq | grep -c $shortcommittime`" = "0" ]; then
+    echo "DISPLAY=:0.0 /usr/bin/notify-send -i qgit 'Коммить!'" | at -t "$committime"
+fi
+
+if [ "`atq | grep -c $shortquittime`" = "0" ]; then
+    echo "DISPLAY=:0.0 /usr/bin/notify-send -i gnome-logout 'Иди домой.'" | at -t "$quittime"
+fi
+

@@ -1,0 +1,54 @@
+#!/bin/bash
+dir=/tmp
+sendkey()
+{
+    key="$1"
+    winid=$(cat $dir/radio-winid)
+    cur_workspace=$(i3-msg -t get_workspaces | tr '{' '\n' | awk -F, '/"visible":true/{print $2}' | cut -d: -f2-)
+    echo "CUR: $cur_workspace"
+    xdotool windowsize $winid 1 1
+    xdotool windowactivate $winid && xdotool key --window $winid $key && xdotool windowminimize $winid
+    xdotool windowsize $winid 1024 660
+    i3-msg workspace $cur_workspace
+}
+
+state()
+{
+    winid=$(cat $dir/radio-winid)
+    windowname=$(xdotool getwindowname $winid)
+    result=$?
+    if [ $result -ne 0 ]; then
+        echo "not running"
+        exit
+    elif echo "$windowname" | grep -q "Яндекс.Радио"; then
+        echo "paused"
+        exit
+    else
+        echo "playing"
+    fi
+
+}
+
+URL=https://radio.yandex.ru/user/bomb-da-base
+if [ "$1" == 'start-music' ]; then
+    URL=https://music.yandex.ru/
+fi
+
+case $1 in
+    start|start-music)
+        chromium --app=$URL &
+        sleep 1
+        winid=$(xdotool search radio.yandex.ru)
+        echo $winid > $dir/radio-winid
+        ;;
+
+    pause) sendkey p ;;
+    next)  sendkey l ;;
+    state) state;;
+    pause-if-playing)
+        state=$(state)
+        if [ "$state" == "playing" ]; then
+            sendkey p 
+        fi
+        ;;
+esac

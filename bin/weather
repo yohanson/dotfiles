@@ -1,0 +1,159 @@
+#!/bin/bash
+
+[ "$BLOCK_BUTTON" == "1" ] && xdg-open http://weather.ngs.ru
+
+ICONSIZE=16
+WEATHERCACHE=/tmp/weather-cache$1
+
+if [ -f "$WEATHERCACHE" ]; then
+    CACHETIMESTAMP=$(date -r "$WEATHERCACHE" +%s)
+    NOW=$(date +%s)
+    CACHEAGE=$(( NOW-CACHETIMESTAMP ))
+    if [ $CACHEAGE -lt 300 ]; then
+        cat "$WEATHERCACHE"
+        exit
+    fi
+fi
+
+[ "$1" == "-p" ] && PANGO=true || PANGO=false
+SUN_COLOR='#FF0'
+MOON_COLOR='#FEFCD7'
+RAIN_COLOR='#034aec'
+
+
+#result=`curl -s 'http://pogoda.ngs.ru/informer?js=no'`
+#result=`cat /home/yohanson/scripts/pogoda.html`
+#current_temp=`echo $result | grep -o '\(\S*\)\s°C' | sed 's/\s°/°/' | tr , .`
+#current_descr=`echo $result | grep -o '°C,[^<]\+</div>' | sed 's#°C,\s*\(\b.*\b\)\s*</div>#\1\n#; s/^./\U&/'`
+#stateicon=`echo $result | grep -o '/ico/150x100/weath[^\.]\+\.png' | sed 's/.\+weath_\(.\+\)\.png/\1/'`
+
+
+
+mainpage=$(curl -s pogoda.ngs.ru | grep -A 50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
+#mainpage=$(cat /home/yohanson/scripts/out.html | grep -A50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
+temp=$(echo "$mainpage" | grep value__degree | sed 's/^.*"value__main">\([^<]\+\)<.*$/\1/; s/&minus;/-/; s,\+,,; y/,/./; s/$/°/')
+
+
+descr=$(echo "$mainpage" | grep value-description | sed 's/<[^>]*>//g')
+wind=$(echo "$mainpage" | grep -A4 wind | tail -n1 | sed 's/<[^>]*>//g')
+pressure=$(echo "$mainpage" | grep icon-pressure | sed 's/^.*title="\([0-9]\+ ..\)".*$/\1/')
+humidity=$(echo "$mainpage" | grep icon-humidity | sed 's/^.*"\([0-9]\+%\)".*$/\1/')
+riseset=$(echo "$mainpage" | grep -A7 today-panel__info__main__item)
+stateicon=$(echo "$mainpage" | head -n1 | sed 's/^.*icon-weather-big \([^"]\+\)".*$/\1/')
+
+wind_kmph=$(echo "3.6*$wind" | cut -d' ' -f 1 | bc -l | sed 's/\.0$//')
+#echo "wind_kmph: $wind_kmph kmph"
+
+current_descr="$descr\nТемпература: $temp\nВетер: $wind ($wind_kmph км/ч)\nДавление: $pressure\nВлажность: $humidity\nicon: $stateicon"
+
+
+# partly_cloudy_light_rain_day
+state_timeofday=$(echo $stateicon | sed 's/^.*_\([^_]\+\)$/\1/')
+state_clouds=$(echo $stateicon | awk -F_ '/^[a-z]+tly/{print $1 "_" $2}; !/^[a-z]+tly/{print $1}')
+state_precipitations=$(echo $stateicon | sed "s/${state_clouds}_\([a-z_]\+\)_[a-z]\+\$/\1/")
+
+#moon period in days = 29.530588853, below in seconds
+moon_period=2551442.8768992
+newmoon_base=`date --date="2012-01-23 14:38:43" +"%s"`
+now=`date +"%s"`
+let "moon_age=$now-$newmoon_base"
+n=`echo "$moon_age/$moon_period" | bc`
+
+moon_phase=`echo "(($moon_age/$moon_period - $n) * 36 )" | bc -l | cut -d. -f1 `
+#echo $moon_phase
+#echo -n calc:
+#echo "0$moon_phase % 36" | bc | printf "%03d"
+moon_phase_36="`echo "0$moon_phase % 36" | bc`"
+moon_phase_36="`printf \"%02d0\" $moon_phase_36`"
+moon_phase_8="`echo "0$moon_phase % 8" | bc`"
+moons=(
+    '🌑'
+    '🌒'
+    '🌓'
+    '🌔'
+    '🌕'
+    '🌖'
+    '🌗'
+    '🌘'
+)
+moons_inv=(
+    '🌕'
+    '🌔'
+    '🌓'
+    '🌒'
+    '🌑'
+    '🌘'
+    '🌗'
+    '🌖'
+)
+#echo moon: $moon_phase_8: ${moons_inv[$moon_phase_8]}
+
+case $moon_phase_36 in
+180) current_descr="$current_descr.
+Сегодня полнолуние."
+     moon_phase_36=''
+    ;;
+
+000) current_descr="$current_descr.
+Сегодня новолуние.";
+     moon_phase_36="-$moon_phase_36"
+    ;;
+
+*)
+     moon_phase_36="-$moon_phase_36"
+     ;;
+esac
+
+case $state_precipitations in
+rain)
+  image='weather-showers'
+  symbol='🌧'
+  $PANGO && symbold="<span foreground='$RAIN_COLOR'>$symbol</span>"
+  ;;
+light_rain)
+  image='weather-showers-scattered'
+  symbol='🌦'
+  ;;
+snow|light_snow)
+  image='weather-snow'
+  symbol='❄'
+  ;;
+thunderstorm)
+  image='weather-storm'
+  symbol='⛈'
+  ;;
+*)
+
+  case $state_clouds in
+  sunshine)
+    image='weather-clear'
+    symbol='☀'
+    $PANGO && symbol="<span foreground='$SUN_COLOR'>$symbol</span>"
+    #[ "$state_timeofday" = "night" ] && image="$image-night$moon_phase_36"
+    if [ "$state_timeofday" = "night" ]; then
+        image="$image-night"
+        symbol="${moons_inv[$moon_phase_8]}"
+        $PANGO && symbol="<span foreground='$MOON_COLOR'>$symbol</span>"
+    fi
+    ;;
+  partly_cloudy|mostly_cloudy)
+    image='weather-few-clouds'
+    symbol='⛅'
+    #[ "$state_timeofday" = "night" ] && image="$image-night$moon_phase_36"
+    [ "$state_timeofday" = "night" ] && image="$image-night"
+    ;;
+  cloudy)
+    image='weather-overcast'
+    symbol='☁'
+    ;;
+  esac
+  ;;
+esac
+
+[ "$1" == "-q" ] && echo "$temp$symbol" | tee "$WEATHERCACHE" && exit
+$PANGO && echo "$temp$symbol" | tee "$WEATHERCACHE" && exit
+
+echo "<txt>$temp</txt>" | tee "$WEATHERCACHE"
+echo -e "<tool>$current_descr</tool>" | tee -a "$WEATHERCACHE"
+echo "<img>/usr/share/icons/gnome/${ICONSIZE}x$ICONSIZE/status/$image.png</img>" | tee -a "$WEATHERCACHE"
+echo "<click>xdg-open http://pogoda.ngs.ru/</click>" | tee -a "$WEATHERCACHE"

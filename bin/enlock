@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# force english layout
+setxkbmap -layout us
+sleep 0.1
+setxkbmap -layout us,ru
+
+radio pause-if-playing
+xscreensaver-command -l
+

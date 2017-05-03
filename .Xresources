@@ -75,5 +75,6 @@ Rxvt*italicFont: xft:DejaVu Sans Mono:Italic
 
 Rxvt*scrollBar: false
 Rxvt*saveLines: 10000
-Rxvt*cutchars: " `'&()*,;<=>?[]^{|}\"\\"
+Rxvt*cutchars: " `'&()*,;<=>?[]^{|}\"\\:"
 Rxvt.cursorBlink: true
+Rxvt.urgentOnBell: true
