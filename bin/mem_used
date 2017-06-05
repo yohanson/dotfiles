@@ -1,0 +1,2 @@
+#!/bin/sh
+cat /proc/meminfo | awk '/^MemTotal/ {mem_total=$2}; /^MemAvailable/ {mem_available=$2}; END{printf("%.0f%", (mem_total-mem_available)/mem_total*100)}'

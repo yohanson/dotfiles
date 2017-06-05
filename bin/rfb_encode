@@ -1,0 +1,38 @@
+#!/bin/bash
+# getting rfbproxy:  git clone git@github.com:pmdumuid/rfbproxy.git
+# tools:  mjpegtools
+
+GIF=false
+FFMPEG=ffmpeg
+which $FFMPEG > /dev/null || FFMPEG=avconv
+which $FFMPEG > /dev/null
+which ppmtoy4m > /dev/null
+
+
+[[ $# -lt 1 ]] && echo -e "Usage: $0 rfb_file\nWill output rfb_file.avi" && exit 1
+
+[ "$1" == "-g" ] && GIF=true && shift
+
+SRC=$1
+
+[[ -f "$SRC" ]] || ( echo "File '$SRC' not found" ; exit 1 )
+
+echo "Select a region to crop in ..." | osd || exit 1
+sec=3
+while [ $sec -gt 0 ]; do
+    echo "$sec..."
+    sleep 1
+    let sec--
+done | osd
+echo "Select a region to crop" | osd || exit 1
+
+crop=$(xrectsel) || exit 1
+[ "$crop" != "" ] || exit 1
+
+if $GIF; then
+    crop=$(echo $crop | awk -F: '{print $1 "x" $2 "+" $3 "+" $4}')
+    echo "$crop"
+    rfbproxy --framerate 10 -x "$SRC" | convert -crop "$crop" - - | convert -delay 10 - "$SRC.gif"
+else
+    rfbproxy --framerate 10 -x "$SRC" | ppmtoy4m -F 10:1 -S 420jpeg | $FFMPEG -f yuv4mpegpipe -i - -vf "crop=$crop" -vcodec h264 -crf 37.5 -bf 2 -r 10 "$SRC.avi"
+fi

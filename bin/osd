@@ -1,0 +1,3 @@
+#!/bin/bash
+osd_cat -p bottom -A center -f '-*-terminus-bold-r-*-*-28-*-*-*-*-*-*-*' -O 1 -c green -d 1
+

@@ -1,0 +1,59 @@
+# i3blocks config file
+#
+# Please see man i3blocks for a complete reference!
+# The man page is also hosted at http://vivien.github.io/i3blocks
+#
+# List of valid properties:
+#
+# align
+# color
+# command
+# full_text
+# instance
+# interval
+# label
+# min_width
+# name
+# separator
+# separator_block_width
+# short_text
+# signal
+# urgent
+
+# Global properties
+separator_block_width=15
+
+[volume]
+#label=🔈
+label=🔉
+instance=Master
+command=/usr/share/i3blocks/volume 2% hw:1
+interval=once
+signal=10
+
+[memory]
+label=mem
+#command=/usr/share/i3blocks/memory
+command=mem_used
+separator=false
+interval=30
+
+[cpu]
+label=cpu
+command=/usr/share/i3blocks/cpu_usage
+interval=10
+min_width=CPU 99.99%
+#separator=false
+
+#[load]
+#command=/usr/share/i3blocks/load_average
+#interval=10
+
+[weather]
+command=weather -p
+interval=30
+markup=pango
+
+[time]
+command=date '+%a %d %b %X'
+interval=5

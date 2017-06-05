@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LOG=$(grep ^LOG= $HOME/bin/screensaver-watch | cut -d= -f2)
+
 clock_to_min()
 {
     hour=$(echo $1 | cut -d: -f1)
@@ -33,7 +35,7 @@ else
    YEAR=$(date +%Y)
    CALEND_YEAR=$(cat $DIR/calend.json | grep -o '"'$YEAR'":.*[^}]}}}')
    if [ -z "$CALEND_YEAR" ]; then
-       wget -q -O $DIR/calend.json http://basicdata.ru/api/json/calend/
+       wget -q -O "$DIR/calend.json" http://basicdata.ru/api/json/calend/
        CALEND_YEAR=$(cat $DIR/calend.json | grep -o '"'$YEAR'":.*[^}]}}}')
    fi
    DAYTYPE=$(echo "$CALEND_YEAR" | grep -o '"'$MONTH'":{"[0-9].*[^}]}}' | grep -o '{.*}' | tr , '\n' | tr -d {}\" | awk -F: '$1==strftime("%-d"){print $3}')
@@ -48,7 +50,7 @@ OFFSET_AT_THE_END_COMMIT_MIN=$(( $TIMEZONE_MIN - $WORKDAYLENGTH_MIN + 15 ))
 OFFSET_AT_THE_END=$(min_to_clock $OFFSET_AT_THE_END_MIN)
 OFFSET_AT_THE_END_COMMIT=$(min_to_clock $OFFSET_AT_THE_END_COMMIT_MIN)
 
-entertime=$(cat $DIR/activity.log | grep "`date +%Y-%m-%d` \(0[6-9]\|1[0-6]\)" | grep Unblank | head -1 | awk '{print $2}' | sed -r 's/:[0-9]+\s*\+[0-9:]+//')
+entertime=$(cat $LOG | grep "`date +%Y-%m-%d` \(0[6-9]\|1[0-6]\)" | grep Unblank | head -1 | awk '{print $2}' | sed -r 's/:[0-9]+\s*\+[0-9:]+//')
 
 committime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%Y%m%d%H%M)
 shortcommittime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%R)

@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <Connection Name In Remmina>"
+    exit 1
+fi
+
+filename=$(grep -l "^name=$1$" ~/.remmina/*)
+count=$(echo "$filename" | wc -l)
+if [ $count -ne 1 ]; then
+    echo "Found $count matches, refusing." | osd
+    exit 1
+fi
+
+if [ -f "$filename" ]; then
+    remmina -c "$filename"
+else
+    echo "Not found '$filename'" | osd
+fi
+
