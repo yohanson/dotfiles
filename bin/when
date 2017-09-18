@@ -1,5 +1,11 @@
 #!/bin/bash
 
+SHORT_FRIDAY=false
+GO_HOME=false
+if [ "$1" == "--go-home" ]; then
+	GO_HOME=true
+fi
+
 LOG=$(grep ^LOG= $HOME/bin/screensaver-watch | cut -d= -f2)
 
 clock_to_min()
@@ -28,7 +34,7 @@ TIMEZONE=$(date +%:z)
 TIMEZONE_MIN=$(clock_to_min $TIMEZONE)
 WORKDAYLENGTH=9:00
 
-if [ `date +%w` -eq 5 ]; then # friday
+if $SHORT_FRIDAY && [ `date +%w` -eq 5 ]; then # friday
     WORKDAYLENGTH=7:30
 else
    MONTH=$(date +%-m)
@@ -50,7 +56,7 @@ OFFSET_AT_THE_END_COMMIT_MIN=$(( $TIMEZONE_MIN - $WORKDAYLENGTH_MIN + 15 ))
 OFFSET_AT_THE_END=$(min_to_clock $OFFSET_AT_THE_END_MIN)
 OFFSET_AT_THE_END_COMMIT=$(min_to_clock $OFFSET_AT_THE_END_COMMIT_MIN)
 
-entertime=$(cat $LOG | grep "`date +%Y-%m-%d` \(0[6-9]\|1[0-6]\)" | grep Unblank | head -1 | awk '{print $2}' | sed -r 's/:[0-9]+\s*\+[0-9:]+//')
+entertime=$(cat $LOG | grep "`date +%Y-%m-%d` \(0[6-9]\|1[0-6]\)" | grep -E 'Unblank|Starting' | head -1 | awk '{print $2}' | sed -r 's/:[0-9]+\s*\+[0-9:]+//')
 
 committime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%Y%m%d%H%M)
 shortcommittime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%R)
@@ -58,11 +64,16 @@ shortcommittime=$(date --date="$entertime $OFFSET_AT_THE_END_COMMIT" +%R)
 quittime=$(date --date="$entertime $OFFSET_AT_THE_END" +%Y%m%d%H%M)
 shortquittime=$(date --date="$entertime $OFFSET_AT_THE_END" +%R)
 
+if $GO_HOME; then
+	echo $shortquittime
+	exit
+fi
+
 echo "Entered $entertime"
 echo "Commit  $shortcommittime"
 echo "Go home $shortquittime"
 if [ "`atq | grep -c $shortcommittime`" = "0" ]; then
-    echo "DISPLAY=:0.0 /usr/bin/notify-send -i qgit 'Коммить!'" | at -t "$committime"
+    echo "DISPLAY=:0.0 /usr/bin/notify-send -i qgit 'Репорть время!'" | at -t "$committime"
 fi
 
 if [ "`atq | grep -c $shortquittime`" = "0" ]; then

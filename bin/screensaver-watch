@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOG=/tmp/screensaver-activity.log
+LOG=/home/mmikhailov/.screensaver-activity.log
 
 echo "$(date --rfc-3339=seconds) Starting" >> $LOG
 echo "$(date --rfc-3339=seconds) Unblank" >> $LOG
@@ -12,12 +12,7 @@ xscreensaver-command -watch | while read line; do
 		# commands to run on screen lock
 		echo "$(date --rfc-3339=seconds) Lock" >> $LOG
 
-        if purple-remote getstatus > /dev/null 2>&1; then
-		    purple-remote 'setstatus?status=away&message=Screen locked'
-        fi
-        if gajim-remote get_status > /dev/null 2>&1; then
-            gajim-remote change_status away 'Screen locked'
-        fi
+		slackstatus away
 
 	elif [[ "$event" == "UNBLANK" ]]; then
 
@@ -25,12 +20,6 @@ xscreensaver-command -watch | while read line; do
 		echo "$(date --rfc-3339=seconds) Unblank" >> $LOG
 		when > /dev/null
 
-        if purple-remote getstatus > /dev/null 2>&1; then
-            purple-remote 'setstatus?status=available&message='
-        fi
-        if gajim-remote get_status > /dev/null 2>&1; then
-            gajim-remote change_status online
-        fi
-
+		slackstatus auto
 	fi
 done

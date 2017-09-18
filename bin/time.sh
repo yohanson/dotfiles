@@ -10,8 +10,13 @@ OLDOF=
 
 function flush()
 {
+    if [ $# -ne 1 ]; then
+        echo "Function requires argument: flush <filename>";
+	exit 1
+    fi
+    local OF="$1"
     counter=0
-    > $OF
+    > "$OF"
     for i in "${!seconds[@]}"; do
         echo  "${seconds[$i]}" $'\t' "$i" >> $OF
     done
@@ -27,16 +32,16 @@ while true; do
         fi
         OF=$OUTFILE-$(date --rfc-3339=date)
         if [ "$OLDOF" != "" ] && [ "$OF" != "$OLDOF" ]; then
-            flush
+            flush "$OF"
             unset seconds
             declare -A seconds
         fi
-        if [[ -z $windowname ]]; then
+        if [[ -n $windowname ]]; then
             let seconds["$windowname"]+=$INTERVAL
             let "counter+=$INTERVAL"
         fi
         if [ $(($counter % $FLUSHINTERVAL)) -eq 0 ]; then
-            flush
+            flush "$OF"
         fi
         OLDOF=$OF
     fi

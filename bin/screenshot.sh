@@ -7,7 +7,7 @@ flock -n 9 || exit 1
 filename=$(date +%F-%H%M%S).png
 
 if [ $# -eq 1 ] && [ $1 = 'current' ]; then
-	import -frame -border -window $(xdotool getwindowfocus) $dir/$filename
+    import -window $(xdotool getwindowfocus) $dir/$filename
     echo -e "Shot window:\n$(xdotool getwindowfocus getwindowname)" | osd
 elif [ $# -eq 1 ] && [ $1 = 'select' ]; then
     sleep 0.5

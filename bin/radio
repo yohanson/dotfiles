@@ -1,32 +1,146 @@
 #!/bin/bash
-dir=/tmp
+# vi: ts=4:sw=4:et:
+dir=$XDG_RUNTIME_DIR/radio
+[ ! -d $dir ] && mkdir -p $dir
+
+get_winid()
+{
+    if [ -e "$dir/winid" ]; then
+        cat "$dir/winid"
+    else
+        echo "Radio is not running" >&2
+        exit 1
+    fi
+}
+
+get_windowname()
+{
+    winid=$(get_winid) || return $?
+    raw=$(xdotool getwindowname $winid 2>/dev/null) || return $?
+    echo "$raw" | sed 's/ - Mozilla Firefox//; s/&/&amp;/g; s/</&lt;/g; s/>/&gt;/g'
+}
+
+get_windowname_old()
+{
+    cat $dir/windowname
+}
+
+save_windowname()
+{
+    echo "$1" > $dir/windowname
+}
+
+start_radio()
+{
+    URL="$1"
+    firefox -P radio $URL &
+    pid=$!
+    winwait_sec=30
+    while ! winid=$(xdotool search --onlyvisible --pid $pid); do
+        echo "$winid"
+        sleep 1
+        winwait_sec=$((winwait_sec-1))
+        if [ $winwait_sec -eq 0 ]; then
+            echo "Radio window not found"
+            exit 1
+        fi
+    done
+    echo $winid > $dir/winid
+    i3-msg "[id=$winid] move window to workspace 8:🎜"
+}
+
+stop_radio()
+{
+    winid=$(get_winid) || return $?
+    xdotool windowclose $winid && rm -f $dir/*
+}
+
 sendkey()
 {
     key="$1"
-    winid=$(cat $dir/radio-winid)
-    cur_workspace=$(i3-msg -t get_workspaces | tr '{' '\n' | awk -F, '/"visible":true/{print $2}' | cut -d: -f2-)
-    echo "CUR: $cur_workspace"
-    xdotool windowsize $winid 1 1
-    xdotool windowactivate $winid && xdotool key --window $winid $key && xdotool windowminimize $winid
-    xdotool windowsize $winid 1024 660
-    i3-msg workspace $cur_workspace
+    winid=$(get_winid) || return $?
+    xdotool key --window $winid $key
 }
 
 state()
 {
-    winid=$(cat $dir/radio-winid)
-    windowname=$(xdotool getwindowname $winid)
+    windowname=$(get_windowname)
     result=$?
     if [ $result -ne 0 ]; then
         echo "not running"
         exit
-    elif echo "$windowname" | grep -q "Яндекс.Радио"; then
+    elif echo "$windowname" | grep -q "Яндекс\.\(Радио\|Музыке\)"; then
         echo "paused"
         exit
     else
         echo "playing"
     fi
+}
 
+title()
+{
+    inside_i3blocks=false
+    [ -n "$BLOCK_NAME" ] && inside_i3blocks=true
+    winid=$(get_winid) || return 0
+    windowname_old=$(get_windowname_old)
+    windowname=$(get_windowname)
+    state=$(state)
+    echo "$(date --rfc-3339=seconds) state='$state' windowname='$windowname' windowname_old='$windowname_old'" >> /tmp/radio.log
+    case "$state" in
+        "not running")
+            echo ""
+            if [ -n "$windowname_old" ]; then
+                save_windowname ""
+            fi
+            exit
+            ;;
+
+        "paused")
+            if $inside_i3blocks; then
+                if [ "$windowname_old" == "Реклама" ]; then
+                    save_windowname ""
+                    pause
+                    sleep 2
+                    refresh_i3blocks
+                    exit
+                elif [ -z "$windowname_old" ]; then
+                    windowname_old='Radio is starting...'
+                fi
+                echo '<span color="#aaa">⏸</span><span font="11" face="PT Sans" color="#888"> '$windowname_old'</span>'
+            else
+                echo "$windowname_old"
+            fi
+            exit
+            ;;
+
+        "playing")
+            $inside_i3blocks \
+                && echo '<span font="11" face="PT Sans" color="#aaa">▶️ '$windowname'</span>' \
+                || echo "$windowname"
+            if [ "$windowname" != "$windowname_old" ]; then
+                if [ "$windowname" == "Реклама" ] || [ "$windowname_old" == "Реклама" ]; then
+                    sendkey 0
+                fi
+                save_windowname "$windowname"
+            fi
+            ;;
+    esac
+}
+
+pause()
+{
+    sendkey p
+}
+
+next()
+{
+    sendkey l
+}
+
+refresh_i3blocks()
+{
+    sleep 0.2
+    pkill -RTMIN+11 i3blocks
 }
 
 URL=https://radio.yandex.ru/user/bomb-da-base
@@ -34,21 +148,29 @@ if [ "$1" == 'start-music' ]; then
     URL=https://music.yandex.ru/
 fi
 
+# Mouse Clicked in i3bar
+if [ "$BLOCK_BUTTON" != "" ]; then
+    # 1:left, 2:mid, 3:right, 4:scrollup, 5:scrolldown
+    case $BLOCK_BUTTON in
+        1) pause;;
+        3) next; sleep 1;;
+        4) vol up;;
+        5) vol down;;
+    esac
+fi
+
 case $1 in
     start|start-music)
-        chromium --app=$URL &
-        sleep 1
-        winid=$(xdotool search radio.yandex.ru)
-        echo $winid > $dir/radio-winid
-        ;;
-
-    pause) sendkey p ;;
-    next)  sendkey l ;;
-    state) state;;
+           start_radio "$URL" ;;
+    pause) pause; refresh_i3blocks ;;
+    next)  next; refresh_i3blocks ;;
+    state) state ;;
+    stop)  stop_radio ;;
+    title) title ;;
     pause-if-playing)
         state=$(state)
         if [ "$state" == "playing" ]; then
-            sendkey p 
+            pause
         fi
         ;;
 esac

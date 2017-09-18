@@ -23,6 +23,12 @@
 # Global properties
 separator_block_width=15
 
+[radio]
+command=radio title
+interval=5
+signal=11
+markup=pango
+
 [volume]
 #label=🔈
 label=🔉

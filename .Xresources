@@ -31,11 +31,6 @@ XTerm*pointerColor: white
 
 !XTerm*renderFont: true
 XTerm*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*
-!XTerm*font: -*-terminuspowerlinelsh-*-*-*-*-*-*-*-*-*-*-*-*
-!XTerm*font: *-iso10646-*
-!xterm*faceName: DejaVu Sans Mono
-!xterm*faceName: Terminess Powerline
-!xterm*faceSize: 14
 xterm*utf8: 2
 xterm*metaSendsEscape: true
 XTerm*VT100.charClass: 33:48,35:48,37:48,42:48,45-47:48,64:48,95:48,126:48
@@ -78,3 +73,4 @@ Rxvt*saveLines: 10000
 Rxvt*cutchars: " `'&()*,;<=>?[]^{|}\"\\:"
 Rxvt.cursorBlink: true
 Rxvt.urgentOnBell: true
+Rxvt.termName: rxvt

@@ -27,7 +27,7 @@ font pango:Terminus, Symbola 14
 floating_modifier $mod
 
 hide_edge_borders both
-new_window pixel 1
+new_window pixel 3
 focus_follows_mouse false
 workspace_layout tabbed
 
@@ -39,17 +39,16 @@ client.focused          #4c7899 #285577 #ffffff #2e9ef4   #2877dd
 bindsym $mod+Return exec urxvt
 bindsym Mod1+F2 exec urxvt
 #bindsym Mod1+grave exec gmrun
-bindsym Mod1+grave exec bashrun2 || gmrun || dmenu_run
-bindsym Mod1+control+l exec enlock
-bindsym Print exec screenshot.sh
-bindsym Shift+Print exec screenshot.sh current
-bindsym Mod4+Shift+Print exec screenshot.sh select
-bindsym $mod+bracketleft exec amixer -c1 set Master 2%- && pkill -RTMIN+10 i3blocks
-bindsym $mod+bracketright exec amixer -c1 set Master 2%+ && pkill -RTMIN+10 i3blocks
-bindsym $mod+equal         exec "amixer -c1 sset Headphone 64,50"
-bindsym Mod1+control+p      exec radio start
-bindsym $mod+p              exec radio pause
-bindsym $mod+backslash      exec radio next
+bindsym Mod1+grave             exec --no-startup-id bashrun2 || gmrun || dmenu_run
+bindsym Mod1+control+l         exec --no-startup-id enlock
+bindsym Print                  exec --no-startup-id screenshot.sh
+bindsym Shift+Print            exec --no-startup-id screenshot.sh current
+bindsym Mod4+Shift+Print       exec --no-startup-id screenshot.sh select
+bindsym $mod+bracketleft       exec --no-startup-id vol down
+bindsym $mod+bracketright      exec --no-startup-id vol up
+bindsym Mod1+control+r         exec radio start
+bindsym Mod1+control+p         exec --no-startup-id radio pause && pkill -RTMIN+11 i3blocks
+bindsym Mod1+control+backslash exec --no-startup-id radio next && pkill -RTMIN+11 i3blocks
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -111,6 +110,9 @@ bindsym $mod+a focus parent
 # focus the child container
 #bindsym $mod+d focus child
 
+set $monitor_one DVI-I-1
+set $monitor_two VGA-0
+
 set $w1 "1:tmux"
 set $w2 "2:web"
 set $w3 "3:chat"
@@ -118,9 +120,19 @@ set $w4 "4:mail"
 set $w5 "5:kvm"
 set $w6 "6:dev"
 set $w7 "7"
-set $w8 "8:music"
+set $w8 "8:🎜"
 set $w9 "9"
 set $w10 "10"
+
+#binding to outputs
+workspace $w1 output $monitor_two
+workspace $w2 output $monitor_one
+workspace $w3 output $monitor_one
+workspace $w4 output $monitor_one
+workspace $w5 output $monitor_one
+workspace $w6 output $monitor_one
+workspace $w7 output $monitor_one
+workspace $w8 output $monitor_one
 
 
 # switch to workspace
@@ -154,10 +166,16 @@ bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
+bindsym $mod+m move workspace to output right
 
-for_window [class="chromium-browser"] move container to workspace $w2
-for_window [class="Telegram"] move container to workspace $w3
-for_window [class="Claws-mail"] move container to workspace $w4
+
+assign [class="chromium-browser"] → $w2
+assign [class="Telegram"]         → $w3
+assign [class="Slack"]            → $w3
+assign [instance="skypeforlinux"] → $w3
+assign [class="Claws-mail"]       → $w4
+assign [class="VirtualBox"]       → $w7
+assign [class="^radio.yandex.ru"] → $w8
 for_window [class="Astercti"] floating enable
 for_window [class="Gajim" window_role="roster"] floating enable, resize set 300px 1000px, [class="Gajim" window_role="roster"] move position 1000px 1px
 for_window [instance="bashrun2-run-dialog"] floating enable
@@ -192,6 +210,11 @@ bindsym $mod+r mode "resize"
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        #status_command myi3status
+	output $monitor_one
         status_command i3blocks
+}
+
+bar {
+	output $monitor_two
+	tray_output none
 }

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-[ "$BLOCK_BUTTON" == "1" ] && xdg-open http://weather.ngs.ru
+[ "$BLOCK_BUTTON" == "1" ] && xdg-open http://weather.ngs.ru > /dev/null
 
 ICONSIZE=16
-WEATHERCACHE=/tmp/weather-cache$1
+WEATHERCACHE=$XDG_RUNTIME_DIR/weather-cache$1
 
 if [ -f "$WEATHERCACHE" ]; then
     CACHETIMESTAMP=$(date -r "$WEATHERCACHE" +%s)
@@ -20,19 +20,8 @@ SUN_COLOR='#FF0'
 MOON_COLOR='#FEFCD7'
 RAIN_COLOR='#034aec'
 
-
-#result=`curl -s 'http://pogoda.ngs.ru/informer?js=no'`
-#result=`cat /home/yohanson/scripts/pogoda.html`
-#current_temp=`echo $result | grep -o '\(\S*\)\s°C' | sed 's/\s°/°/' | tr , .`
-#current_descr=`echo $result | grep -o '°C,[^<]\+</div>' | sed 's#°C,\s*\(\b.*\b\)\s*</div>#\1\n#; s/^./\U&/'`
-#stateicon=`echo $result | grep -o '/ico/150x100/weath[^\.]\+\.png' | sed 's/.\+weath_\(.\+\)\.png/\1/'`
-
-
-
 mainpage=$(curl -s pogoda.ngs.ru | grep -A 50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
-#mainpage=$(cat /home/yohanson/scripts/out.html | grep -A50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
 temp=$(echo "$mainpage" | grep value__degree | sed 's/^.*"value__main">\([^<]\+\)<.*$/\1/; s/&minus;/-/; s,\+,,; y/,/./; s/$/°/')
-
 
 descr=$(echo "$mainpage" | grep value-description | sed 's/<[^>]*>//g')
 wind=$(echo "$mainpage" | grep -A4 wind | tail -n1 | sed 's/<[^>]*>//g')
@@ -42,10 +31,8 @@ riseset=$(echo "$mainpage" | grep -A7 today-panel__info__main__item)
 stateicon=$(echo "$mainpage" | head -n1 | sed 's/^.*icon-weather-big \([^"]\+\)".*$/\1/')
 
 wind_kmph=$(echo "3.6*$wind" | cut -d' ' -f 1 | bc -l | sed 's/\.0$//')
-#echo "wind_kmph: $wind_kmph kmph"
 
 current_descr="$descr\nТемпература: $temp\nВетер: $wind ($wind_kmph км/ч)\nДавление: $pressure\nВлажность: $humidity\nicon: $stateicon"
-
 
 # partly_cloudy_light_rain_day
 state_timeofday=$(echo $stateicon | sed 's/^.*_\([^_]\+\)$/\1/')
