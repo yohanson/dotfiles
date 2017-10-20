@@ -82,9 +82,9 @@ title()
     inside_i3blocks=false
     [ -n "$BLOCK_NAME" ] && inside_i3blocks=true
     winid=$(get_winid) || return 0
+    state=$(state)
     windowname_old=$(get_windowname_old)
     windowname=$(get_windowname)
-    state=$(state)
     echo "$(date --rfc-3339=seconds) state='$state' windowname='$windowname' windowname_old='$windowname_old'" >> /tmp/radio.log
     case "$state" in
         "not running")
@@ -139,30 +139,44 @@ next()
 
 refresh_i3blocks()
 {
-    sleep 0.2
+    delay=0.2
+    if [ "$1" ]; then
+        delay=$1
+    fi
+    sleep $delay
     pkill -RTMIN+11 i3blocks
 }
 
-URL=https://radio.yandex.ru/user/bomb-da-base
-if [ "$1" == 'start-music' ]; then
-    URL=https://music.yandex.ru/
-fi
 
 # Mouse Clicked in i3bar
 if [ "$BLOCK_BUTTON" != "" ]; then
     # 1:left, 2:mid, 3:right, 4:scrollup, 5:scrolldown
     case $BLOCK_BUTTON in
-        1) pause;;
+        1) pause; sleep 0.1;;
         3) next; sleep 1;;
-        4) vol up;;
-        5) vol down;;
+        4) vol up; exit 1;; # error to preserve i3bar title
+        5) vol down; exit 1;;
     esac
 fi
 
 case $1 in
     start|start-music)
-           start_radio "$URL" ;;
-    pause) pause; refresh_i3blocks ;;
+        if [ "$1" == 'start-music' ]; then
+            URL=https://music.yandex.ru/
+        else
+            URL=https://radio.yandex.ru/user/bomb-da-base
+        fi
+        start_radio "$URL"
+        ;;
+    pause)
+        prev_state=$(state)
+        pause
+        if [ "$prev_state" == "playing" ]; then
+            refresh_i3blocks 0
+        else
+            refresh_i3blocks
+        fi
+        ;;
     next)  next; refresh_i3blocks ;;
     state) state ;;
     stop)  stop_radio ;;

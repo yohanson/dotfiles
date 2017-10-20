@@ -1,0 +1,77 @@
+#!/bin/bash
+CACHEFILE=$XDG_RUNTIME_DIR/upcoming_events
+LAST_STATE_FILE=$XDG_RUNTIME_DIR/upcoming_events_state
+CACHE_SECONDS=300
+
+seconds_left()
+{
+	goal_time=$1
+	echo $(( `date +%s --date=$goal_time` - `date +%s` ))
+}
+
+time_left()
+{
+	goal_time=$1
+	seconds_left=$(seconds_left $goal_time)
+	TZ=UTC date +%H:%M:%S --date=@$seconds_left
+}
+
+short_time()
+{
+	date +%R --date="$@"
+}
+
+file_age=9999999
+if [ -e $CACHEFILE ]; then
+	file_timestamp=$(stat -c "%Y" $CACHEFILE)
+	file_age=$(( `date +%s` - $file_timestamp ))
+fi
+
+if [ $file_age -gt $CACHE_SECONDS ]; then
+    contents=$(upcoming_events.py)
+    echo "$contents" > $CACHEFILE
+fi
+
+open_link=false
+case "$BLOCK_BUTTON" in
+1)
+	open_link=true
+        ;;
+3)
+	BLOCK_BUTTON= BLOCK_NAME= upcoming_events | osd -d3 -Aright
+        ;;
+esac
+
+events=$(cat $CACHEFILE | sort)
+echo "$events" | while read line; do
+	[ -z "$line" ] && continue
+	time=$(echo "$line" | cut -d' ' -f1)
+	eventid=$(echo "$line" | cut -d' ' -f2)
+	subject=$(echo "$line" | cut -d' ' -f3-)
+	seconds_left=$(seconds_left $time)
+        if $open_link; then
+            open_link=false
+            xdg-open "${URL_BASE}${eventid}" &
+        fi
+	color=#888
+	if [ $seconds_left -lt -60 ]; then
+		continue
+	elif [ $seconds_left -lt 60 ]; then
+		color=#c88
+	elif [ $seconds_left -lt 180 ]; then
+		color=#cc8
+		if ! grep -q "color='$color'" LAST_STATE_FILE; then # just entered state "less than 3min left"
+			if [ "$subject" == "Plesk Core QA sync-up" ]; then
+				vboxmanage startvm "IE9 - Win7" &
+			fi
+		fi
+	fi
+	if [ $BLOCK_NAME ]; then
+		echo -n "<span color='$color' font='PT Sans 11'>"
+	fi
+	echo -n $subject at $(short_time $time)
+	if [ $BLOCK_NAME ]; then
+		echo -n '</span>'
+	fi
+	echo ""
+done

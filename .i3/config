@@ -9,7 +9,7 @@
 #
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
-set $mod Mod4
+set $mod Mod1
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -113,15 +113,15 @@ bindsym $mod+a focus parent
 set $monitor_one DVI-I-1
 set $monitor_two VGA-0
 
-set $w1 "1:tmux"
+set $w1 "1:term"
 set $w2 "2:web"
 set $w3 "3:chat"
 set $w4 "4:mail"
 set $w5 "5:kvm"
-set $w6 "6:dev"
-set $w7 "7"
+set $w6 "6:term"
+set $w7 "7:vm"
 set $w8 "8:🎜"
-set $w9 "9"
+set $w9 "9:notes"
 set $w10 "10"
 
 #binding to outputs
@@ -146,6 +146,16 @@ bindsym $mod+7 workspace $w7
 bindsym $mod+8 workspace $w8
 bindsym $mod+9 workspace $w9
 bindsym $mod+0 workspace $w10
+bindcode $mod+87 workspace "11"
+bindcode $mod+88 workspace "12"
+bindcode $mod+89 workspace "13"
+bindcode $mod+83 workspace "14"
+bindcode $mod+84 workspace "15"
+bindcode $mod+85 workspace "16"
+bindcode $mod+79 workspace "17"
+bindcode $mod+80 workspace "18"
+bindcode $mod+81 workspace "19"
+bindcode $mod+90 workspace "20"
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $w1

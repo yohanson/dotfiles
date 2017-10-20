@@ -1,4 +1,4 @@
 #!/bin/bash
 TOP_OFFSET=$(grep ^TOP_OFFSET= ~/.xinitrc | cut -d= -f2)
-osd_cat -p bottom -o -$TOP_OFFSET -A center -f '-*-terminus-bold-r-*-*-28-*-*-*-*-*-*-*' -O 1 -c green -d 1
+osd_cat -p bottom -o -$TOP_OFFSET -A center -f '-*-terminus-bold-r-*-*-28-*-*-*-*-*-*-*' -O 1 -c green -d 1 $@
 

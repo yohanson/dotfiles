@@ -23,6 +23,11 @@
 # Global properties
 separator_block_width=15
 
+[upcoming_events]
+command=upcoming_events
+interval=10
+markup=pango
+
 [radio]
 command=radio title
 interval=5
