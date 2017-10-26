@@ -60,18 +60,22 @@ echo "$events" | while read line; do
 		color=#c88
 	elif [ $seconds_left -lt 180 ]; then
 		color=#cc8
-		if ! grep -q "color='$color'" LAST_STATE_FILE; then # just entered state "less than 3min left"
+		if ! grep -q "color='$color'" "$LAST_STATE_FILE"; then # just entered state "less than 3min left"
 			if [ "$subject" == "Plesk Core QA sync-up" ]; then
 				vboxmanage startvm "IE9 - Win7" &
 			fi
 		fi
 	fi
+        PREFIX=""
+        POSTFIX=""
 	if [ $BLOCK_NAME ]; then
-		echo -n "<span color='$color' font='PT Sans 11'>"
+            PREFIX="<span color='$color' font='PT Sans 11'>"
+            POSTFIX="</span>"
+            subject=$(echo "$subject" | sed 's/&/&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
 	fi
-	echo -n $subject at $(short_time $time)
+        statusline="${PREFIX}$subject at $(short_time $time)${POSTFIX}"
 	if [ $BLOCK_NAME ]; then
-		echo -n '</span>'
+            echo "$statusline" > $LAST_STATE_FILE
 	fi
-	echo ""
+	echo "$statusline"
 done
