@@ -28,7 +28,7 @@ if [ -e $CACHEFILE ]; then
 fi
 
 if [ $file_age -gt $CACHE_SECONDS ]; then
-    contents=$(upcoming_events.py)
+    contents=$(upcoming_events.py | sort)
     echo "$contents" > $CACHEFILE
 fi
 
@@ -42,17 +42,15 @@ case "$BLOCK_BUTTON" in
     ;;
 esac
 
-events=$(cat $CACHEFILE | sort)
+events=$(cat $CACHEFILE)
 echo "$events" | while read line; do
     [ -z "$line" ] && continue
     time=$(echo "$line" | cut -d' ' -f1)
     eventid=$(echo "$line" | cut -d' ' -f2)
-    subject=$(echo "$line" | cut -d' ' -f3-)
+    location=$(echo "$line" | cut -d' ' -f3)
+    subject=$(echo "$line" | cut -d' ' -f4-)
     seconds_left=$(seconds_left $time)
-    if $open_link; then
-        open_link=false
-        xdg-open "${URL_BASE}${eventid}" &
-    fi
+    short_time=$(short_time $time)
     color=#888
     if [ $seconds_left -lt -60 ]; then
         continue
@@ -61,10 +59,17 @@ echo "$events" | while read line; do
     elif [ $seconds_left -lt 180 ]; then
         color=#cc8
         if ! grep -q "color='$color'" "$LAST_STATE_FILE"; then # just entered state "less than 3min left"
-            if [ "$subject" == "Plesk Core QA sync-up" ]; then
+            if [ "$location" == "webex" ]; then
                 vboxmanage startvm "IE9 - Win7" &
             fi
         fi
+    fi
+    if ! grep -q "$short_time" "$LAST_STATE_FILE"; then # time changed
+        color=#8cc
+    fi
+    if $open_link; then
+        open_link=false
+        xdg-open "${URL_BASE}${eventid}" &
     fi
     PREFIX=""
     POSTFIX=""
@@ -72,10 +77,16 @@ echo "$events" | while read line; do
         PREFIX="<span color='$color' font='PT Sans 11'>"
         POSTFIX="</span>"
         subject=$(echo "$subject" | sed 's/&/&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+        if [ "$location" == "webex" ]; then
+            PREFIX="${PREFIX} 🎧  "
+        else
+            PREFIX="${PREFIX}⛹ "
+        fi
     fi
-    statusline="${PREFIX}$subject at $(short_time $time)${POSTFIX}"
+    statusline="${PREFIX}$subject at ${short_time}${POSTFIX}"
+    echo "$statusline"
     if [ $BLOCK_NAME ]; then
         echo "$statusline" > $LAST_STATE_FILE
+        break;
     fi
-    echo "$statusline"
 done

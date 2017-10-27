@@ -43,4 +43,9 @@ if __name__ == '__main__':
                             starttime_local = time.localtime(time.mktime(event.getStart())-time.timezone)
                             request_template = { 'viewmodel' : 'ICalendarItemDetailsViewModelFactory', 'ItemID' : event.json['Id'] }
                             url = url_base + urllib.urlencode(request_template).replace('_', '%2B').replace('-', '%2F')
-                            print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + event.getSubject().encode('utf-8'))
+                            location = event.json['Location']['DisplayName'].find('webex')
+                            if location > -1:
+                                location = 'webex'
+                            else:
+                                location = 'offline'
+                            print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + location + " " + event.getSubject().encode('utf-8'))
