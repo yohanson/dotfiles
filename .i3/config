@@ -125,6 +125,16 @@ set $w7 "7:vm"
 set $w8 "8:🎜"
 set $w9 "9:notes"
 set $w10 "10"
+set $w11 "11"
+set $w12 "12"
+set $w13 "13"
+set $w14 "14"
+set $w15 "15"
+set $w16 "16"
+set $w17 "17"
+set $w18 "18"
+set $w19 "19"
+set $w20 "20"
 
 #binding to outputs
 workspace $w1 output $monitor_two
@@ -148,16 +158,16 @@ bindsym $mod+7 workspace $w7
 bindsym $mod+8 workspace $w8
 bindsym $mod+9 workspace $w9
 bindsym $mod+0 workspace $w10
-bindcode $mod+87 workspace "11"
-bindcode $mod+88 workspace "12"
-bindcode $mod+89 workspace "13"
-bindcode $mod+83 workspace "14"
-bindcode $mod+84 workspace "15"
-bindcode $mod+85 workspace "16"
-bindcode $mod+79 workspace "17"
-bindcode $mod+80 workspace "18"
-bindcode $mod+81 workspace "19"
-bindcode $mod+90 workspace "20"
+bindcode $mod+87 workspace $w11
+bindcode $mod+88 workspace $w12
+bindcode $mod+89 workspace $w13
+bindcode $mod+83 workspace $w14
+bindcode $mod+84 workspace $w15
+bindcode $mod+85 workspace $w16
+bindcode $mod+79 workspace $w17
+bindcode $mod+80 workspace $w18
+bindcode $mod+81 workspace $w19
+bindcode $mod+90 workspace $w20
 
 # move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $w1
@@ -170,6 +180,16 @@ bindsym $mod+Shift+7 move container to workspace $w7
 bindsym $mod+Shift+8 move container to workspace $w8
 bindsym $mod+Shift+9 move container to workspace $w9
 bindsym $mod+Shift+0 move container to workspace $w10
+bindcode $mod+Shift+87 move container to workspace $w11
+bindcode $mod+Shift+88 move container to workspace $w12
+bindcode $mod+Shift+89 move container to workspace $w13
+bindcode $mod+Shift+83 move container to workspace $w14
+bindcode $mod+Shift+84 move container to workspace $w15
+bindcode $mod+Shift+85 move container to workspace $w16
+bindcode $mod+Shift+79 move container to workspace $w17
+bindcode $mod+Shift+80 move container to workspace $w18
+bindcode $mod+Shift+81 move container to workspace $w19
+bindcode $mod+Shift+90 move container to workspace $w20
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
