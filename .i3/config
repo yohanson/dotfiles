@@ -51,6 +51,7 @@ bindsym XF86AudioRaiseVolume   exec --no-startup-id vol up
 bindsym Mod1+control+r         exec radio start
 bindsym Mod1+control+p         exec --no-startup-id radio pause && pkill -RTMIN+11 i3blocks
 bindsym Mod1+control+backslash exec --no-startup-id radio next && pkill -RTMIN+11 i3blocks
+bindsym Mod1+control+k         exec --no-startup-id snippet
 
 # kill focused window
 bindsym $mod+Shift+q kill
