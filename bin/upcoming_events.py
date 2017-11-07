@@ -34,12 +34,14 @@ if __name__ == '__main__':
 		for cal in schedule.calendars:
                         if cal.getName() == 'United States holidays':
                             continue
-			#print('attempting to fetch events for',e)
+			#print('attempting to fetch events for',cal.getName())
                         start = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time()-30))
                         end = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time()+8*3600))
                         result = cal.getEvents(start, end, 100)
                         #print('Got events',result,'got',len(cal.events))
 			for event in cal.events:
+                            if event.json['IsAllDay']:
+                                continue
                             starttime_local = time.localtime(time.mktime(event.getStart())-time.timezone)
                             request_template = { 'viewmodel' : 'ICalendarItemDetailsViewModelFactory', 'ItemID' : event.json['Id'] }
                             url = url_base + urllib.urlencode(request_template).replace('_', '%2B').replace('-', '%2F')

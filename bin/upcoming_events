@@ -21,6 +21,20 @@ short_time()
     date +%R --date="$@"
 }
 
+
+open_link=false
+case "$BLOCK_BUTTON" in
+1)
+    open_link=true
+    ;;
+2)
+    rm $CACHEFILE; # force update
+    ;;
+3)
+    BLOCK_BUTTON= BLOCK_NAME= upcoming_events | osd -d3 -Aright
+    ;;
+esac
+
 file_age=9999999
 if [ -e $CACHEFILE ]; then
     file_timestamp=$(stat -c "%Y" $CACHEFILE)
@@ -31,16 +45,6 @@ if [ $file_age -gt $CACHE_SECONDS ]; then
     contents=$(upcoming_events.py | sort)
     echo "$contents" > $CACHEFILE
 fi
-
-open_link=false
-case "$BLOCK_BUTTON" in
-1)
-    open_link=true
-    ;;
-3)
-    BLOCK_BUTTON= BLOCK_NAME= upcoming_events | osd -d3 -Aright
-    ;;
-esac
 
 events=$(cat $CACHEFILE)
 echo "$events" | while read line; do
