@@ -1,0 +1,6 @@
+#!/bin/bash
+binaries=$(/usr/bin/dmenu_path)
+history=$(grep -v '^#' ~/.bash_history | sort | uniq)
+echo "$binaries"
+echo "$history"
+

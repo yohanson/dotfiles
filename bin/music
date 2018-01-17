@@ -1,0 +1,138 @@
+#!/bin/bash
+# vi: ts=4:sw=4:et:
+dir=$XDG_RUNTIME_DIR/music
+[ ! -d $dir ] && mkdir -p $dir
+
+player_type=
+
+detect_player()
+{
+    [ "$(music_deadbeef state)" != "not running" ] && echo deadbeef && exit 0
+    [ "$(music_yaradio state)" != "not running" ] && echo yaradio && exit 0
+    exit 1
+}
+
+stop()
+{
+    [ -n "$player_type" ] || return 1
+    music_$player_type stop
+}
+
+state()
+{
+    cur_state=$(music_$player_type state)
+    echo $cur_state
+    [ "$cur_state" == 'not running' ] && return 1
+    return 0
+}
+
+title()
+{
+    inside_i3blocks=false
+    [ -n "$BLOCK_NAME" ] && inside_i3blocks=true
+    state=$(state) || return 0
+    title=$(music_$player_type title)
+    case "$state" in
+        "not running")
+            echo ""
+            exit
+            ;;
+
+        "paused")
+            if $inside_i3blocks; then
+                echo '<span color="#aaa">⏸</span><span font="11" face="PT Sans" color="#888"> '$title'</span>'
+            fi
+            exit
+            ;;
+
+        "playing")
+            $inside_i3blocks \
+                && echo '<span font="11" face="PT Sans" color="#aaa">▶️ '$title'</span>' \
+                || echo "$title"
+            ;;
+    esac
+}
+
+pause()
+{
+    music_$player_type pause
+}
+
+next()
+{
+    music_$player_type next
+}
+
+refresh_i3blocks()
+{
+    delay=0.2
+    if [ "$1" ]; then
+        delay=$1
+    fi
+    sleep $delay
+    pkill -RTMIN+11 i3blocks
+}
+
+usage()
+{
+    cmd=${1:-`basename $0`}
+    indent_level=${2:-1}
+    indent=$(( indent_level * 4 ))
+
+    commands=$(grep -A100 '^case \$1 in' $0 | grep -oE "^\s{$indent}[-a-z\|]+)" | tr '|)' '  ' | xargs | sed 's/ / | /g')
+    echo "Usage: $cmd { $commands }"
+}
+
+# Execution starts here:
+
+player_type=$(detect_player)
+
+# Mouse Clicked in i3bar
+if [ "$BLOCK_BUTTON" != "" ]; then
+    # 1:left, 2:mid, 3:right, 4:scrollup, 5:scrolldown
+    case $BLOCK_BUTTON in
+        1) pause; sleep 0.1;;
+        3) next; sleep 1;;
+        4) vol up; exit 1;; # error to preserve i3bar title
+        5) vol down; exit 1;;
+    esac
+fi
+
+case $1 in
+    start)
+        if [ "$player_type" ]; then
+            echo "$player_type is already running, refusing to start" 2>/dev/null
+            exit 1
+        fi
+        case $2 in
+            yaradio|yamusic|deadbeef)
+                player_type=$2
+                music_$player_type start
+                ;;
+            *)
+                usage "$(basename $0) start" 3; exit 1;
+        esac
+        ;;
+    pause)
+        prev_state=$(state)
+        pause
+        if [ "$prev_state" == "playing" ]; then
+            refresh_i3blocks 0
+        else
+            refresh_i3blocks
+        fi
+        ;;
+    next)  next; refresh_i3blocks ;;
+    stop)  stop ;;
+    state) state ;;
+    title) title ;;
+    pause-if-playing)
+        state=$(state)
+        if [ "$state" == "playing" ]; then
+            pause
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac

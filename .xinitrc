@@ -1,6 +1,5 @@
 #!/bin/bash
 
-TOP_OFFSET=630
 session=$1
 
 [ -z "$session" ] && session=x-session-manager
@@ -16,6 +15,8 @@ export MAILER=claws-mail
 
 xrdb -load ~/.Xresources
 
+. $HOME/.config/my_scripts.conf
+
 xrandr --output VGA-0 --rotate left --pos 0x0 \
        --output DVI-I-1 --pos 1080x$TOP_OFFSET --primary
 
@@ -26,13 +27,12 @@ feh --bg-tile .bg.jpg &
 gxkb &
 ~/.local/share/TelegramDesktop/Telegram &
 slack &
-skypeforlinux &
-xscreensaver -no-splash &
+xautolock &
 parcellite &
 pasystray &
 claws-mail &
-[ -x ~/bin/screensaver-watch ] && ~/bin/screensaver-watch &
 xfce4-notifyd || /usr/lib/x86_64-linux-gnu/xfce4/notifyd/xfce4-notifyd &
+arbtt-capture &
 exec i3
 #exec $session
 

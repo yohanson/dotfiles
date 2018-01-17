@@ -8,7 +8,6 @@ which $FFMPEG > /dev/null || FFMPEG=avconv
 which $FFMPEG > /dev/null
 which ppmtoy4m > /dev/null
 
-
 [[ $# -lt 1 ]] && echo -e "Usage: $0 rfb_file\nWill output rfb_file.avi" && exit 1
 
 [ "$1" == "-g" ] && GIF=true && shift
@@ -34,5 +33,5 @@ if $GIF; then
     echo "$crop"
     rfbproxy --framerate 10 -x "$SRC" | convert -crop "$crop" - - | convert -delay 10 - "$SRC.gif"
 else
-    rfbproxy --framerate 10 -x "$SRC" | ppmtoy4m -F 10:1 -S 420jpeg | $FFMPEG -f yuv4mpegpipe -i - -vf "crop=$crop" -vcodec h264 -crf 37.5 -bf 2 -r 10 "$SRC.avi"
+    rfbproxy --framerate 25 -x "$SRC" | ppmtoy4m -F 25:1 -S 420jpeg | $FFMPEG -f yuv4mpegpipe -i - -vf "crop=$crop" -vcodec h264 -crf 30 -r 25 "$SRC.avi"
 fi

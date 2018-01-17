@@ -1,19 +1,31 @@
 #!/bin/bash
-if [ $# -ne 1 ]; then
-    echo "Usage: $0 <Connection Name In Remmina>"
-    exit 1
-fi
+. ~/.config/my_scripts.conf
+remmina_result=false
+if which remmina > /dev/null; then
+	if [ $# -ne 1 ]; then
+		echo "Usage: $0 <Connection Name In Remmina>"
+		exit 1
+	fi
 
-filename=$(grep -l "^name=$1$" ~/.remmina/*)
-count=$(echo "$filename" | wc -l)
-if [ $count -ne 1 ]; then
-    echo "Found $count matches, refusing." | osd
-    exit 1
-fi
+	filename=$(grep -l "^name=$1$" ~/.remmina/*)
+	count=$(echo "$filename" | wc -l)
+	if [ $count -ne 1 ]; then
+		echo "Found $count matches, refusing." | osd
+		exit 1
+	fi
 
-if [ -f "$filename" ]; then
-    remmina -c "$filename"
-else
-    echo "Not found '$filename'" | osd
+	if [ -f "$filename" ]; then
+		remmina -c "$filename" && remmina_result=true
+	else
+		echo "Not found '$filename'" | osd
+	fi
 fi
+if which xfreerdp > /dev/null && ! $remmina_result; then
+	if [ $# -ne 1 ]; then
+		echo "Usage: $0 <IP address>"
+		exit 1
+	fi
+    [ -d $HOME/shared ] || mkdir $HOME/shared
 
+	xfreerdp /cert-ignore /u:$rdp_username /p:"$rdp_password" /w:$rdp_width /h:$rdp_height /v:$1 +clipboard /drive:shared,$HOME/shared &
+fi

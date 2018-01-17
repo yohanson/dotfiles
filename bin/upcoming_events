@@ -2,6 +2,9 @@
 CACHEFILE=$XDG_RUNTIME_DIR/upcoming_events
 LAST_STATE_FILE=$XDG_RUNTIME_DIR/upcoming_events_state
 CACHE_SECONDS=300
+SHOW_AFTER_SECONDS=300
+UPCOMING_RED_SECONDS=60
+UPCOMING_YELLOW_SECONDS=180
 
 seconds_left()
 {
@@ -56,11 +59,11 @@ echo "$events" | while read line; do
     seconds_left=$(seconds_left $time)
     short_time=$(short_time $time)
     color=#888
-    if [ $seconds_left -lt -60 ]; then
+    if [ $seconds_left -lt -$SHOW_AFTER_SECONDS ]; then
         continue
-    elif [ $seconds_left -lt 60 ]; then
+    elif [ $seconds_left -lt $UPCOMING_RED_SECONDS ]; then
         color=#c88
-    elif [ $seconds_left -lt 180 ]; then
+    elif [ $seconds_left -lt $UPCOMING_YELLOW_SECONDS ]; then
         color=#cc8
         if ! grep -q "color='$color'" "$LAST_STATE_FILE"; then # just entered state "less than 3min left"
             if [ "$location" == "webex" ]; then

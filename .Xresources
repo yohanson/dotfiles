@@ -62,11 +62,9 @@ Rxvt*color14: #00f5e9
 Rxvt*color15: #eeeeec
 
 !------------ Rxvt:
-Rxvt*font: xft:Terminess Powerline:pixelsize=18, xft:PT Mono:antialias=false, xft:DejaVu Sans, xft:Symbola monospacified for Terminus (TTF)
-Rxvt*boldFont: xft:Terminess Powerline:pixelsize=18:Bold, xft:PT Mono:antialias=false:Bold, xft:DejaVu Sans:Bold, xft:Symbola monospacified for Terminus (TTF):Bold
+Rxvt*font: xft:Terminess Powerline:pixelsize=18, xft:Terminus:pixelsize=18, xft:PT Mono:antialias=false, xft:DejaVu Sans, xft:Symbola monospacified for Terminus (TTF)
+Rxvt*boldFont: xft:Terminess Powerline:pixelsize=18:Bold, xft:Terminus:pixelsize=18, xft:PT Mono:antialias=false:Bold, xft:DejaVu Sans:Bold, xft:Symbola monospacified for Terminus (TTF):Bold
 Rxvt*italicFont: xft:DejaVu Sans Mono:Italic
-!Rxvt*font: -*-terminesspowerline-medium-r-normal--18-*-*-*-*-*-iso10646-1, xft:DefaVu Sans:pixelsize=18
-!Rxvt*font: -*-terminus-medium-r-normal-*-18-*-*-*-*-*-iso10646-*, xft:Inconsolata for Powerline, xft:DefaVu Sans:size=14
 
 Rxvt*scrollBar: false
 Rxvt*saveLines: 10000
@@ -74,3 +72,8 @@ Rxvt*cutchars: " `'&()*,;<=>?[]^{|}\"\\:"
 Rxvt.cursorBlink: true
 Rxvt.urgentOnBell: true
 Rxvt.termName: rxvt
+
+Xautolock.locker: enlock
+Xautolock.time:   5
+Xautolock.notify: 10
+Xautolock.notifier: "notify-send '10 seconds to screen lock'"

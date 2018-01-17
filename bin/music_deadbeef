@@ -1,0 +1,70 @@
+#!/bin/bash
+# vi: ts=4:sw=4:et:
+
+binary=/opt/deadbeef/bin/deadbeef
+
+start()
+{
+    $binary --play >/dev/null 2>/dev/null &
+}
+
+stop()
+{
+    killall $binary
+}
+
+state()
+{
+    pid=$(pidof deadbeef)
+    isplaying=$($binary --nowplaying-tf "%isplaying%" 2>/dev/null)
+    if [ -z $pid ]; then
+        echo "not running"
+        exit
+    elif [ -z $isplaying ]; then
+        echo "paused"
+        exit
+    else
+        echo "playing"
+    fi
+}
+
+title()
+{
+    $binary --nowplaying-tf "%title% - %artist%" 2>/dev/null
+}
+
+pause()
+{
+    $binary --toggle-pause 2>/dev/null
+}
+
+next()
+{
+    $binary --next 2>/dev/null
+}
+
+usage()
+{
+    commands=$(grep -A100 '^case \$1 in' $0 | grep -o '^\s*[-a-z\|]\+)' | tr '|)' '  ' | xargs | sed 's/ / | /g')
+    echo "Usage: `basename $0` { $commands }"
+}
+
+case $1 in
+    start)
+        start ;;
+    pause)
+        pause ;;
+    next)  next ;;
+    state) state ;;
+    stop)  stop ;;
+    title) title ;;
+    pause-if-playing)
+        state=$(state)
+        if [ "$state" == "playing" ]; then
+            pause
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac

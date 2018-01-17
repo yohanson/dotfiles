@@ -1,0 +1,56 @@
+#!/bin/bash
+. $HOME/.config/my_scripts.conf
+apiurl="https://slack.com/api/users.setPresence"
+
+set_presense()
+{
+	status=$1
+	curl -d presence=$status -d "token=$slacktoken" $apiurl
+}
+
+set_status()
+{
+	status_emoji=$1
+	status_text=$2
+	curl -d "token=$slacktoken" -d profile=%7B%22status_text%22%3A%22$status_text%22%2C%22status_emoji%22%3A%22$status_emoji%22%7D https://slack.com/api/users.profile.set
+}
+
+get_status()
+{
+	JSON=$(curl -s -d "token=$slacktoken" https://slack.com/api/users.profile.get)
+        result=$?
+        if [ $result -ne 0 ]; then
+            echo "Exit code: $result. $JSON"
+            exit
+        fi
+        status_emoji=$(echo "$JSON" | sed -rn 's/.*"status_emoji":"([^"]*)".*/\1/p')
+        status_text=$(echo "$JSON" | sed -rn 's/.*"status_text":"([^"]*)".*/\1/p')
+	if [ -n "${status_emoji}${status_text}" ]; then
+		echo "$status_emoji $status_text"
+	fi
+}
+
+status=$1
+case $status in
+get)
+	get_status
+	;;
+lunch)
+	set_presense away
+	set_status ':fork_and_knife:' lunch 
+	;;
+
+away)
+	set_presense $status
+	;;
+auto)
+	set_presense $status
+	if [ -n "$(get_status)" ]; then
+		set_status "" ""
+	fi
+	;;
+*)
+	echo "Usage: $0 {away|auto|lunch}"
+	exit 1
+	;;
+esac

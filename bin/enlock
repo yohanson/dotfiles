@@ -2,9 +2,23 @@
 
 # force english layout
 setxkbmap -layout us
-sleep 0.1
+
+music pause-if-playing &
+
+# commands to run on screen lock
+locklog lock &
+slackstatus away &
+
+
+#xscreensaver-command -l
+i3lock -n -c '000000'
+
 setxkbmap -layout us,ru
 
-radio pause-if-playing
-xscreensaver-command -l
+
+# commands to run on screen unlock
+locklog unlock
+when > /dev/null
+
+slackstatus auto
 

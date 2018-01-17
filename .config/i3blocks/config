@@ -29,7 +29,7 @@ interval=10
 markup=pango
 
 [radio]
-command=radio title
+command=music title
 interval=5
 signal=11
 markup=pango

@@ -42,12 +42,18 @@ if __name__ == '__main__':
 			for event in cal.events:
                             if event.json['IsAllDay']:
                                 continue
+                            if event.json['IsCancelled']:
+                                continue
                             starttime_local = time.localtime(time.mktime(event.getStart())-time.timezone)
                             request_template = { 'viewmodel' : 'ICalendarItemDetailsViewModelFactory', 'ItemID' : event.json['Id'] }
                             url = url_base + urllib.urlencode(request_template).replace('_', '%2B').replace('-', '%2F')
-                            location = event.json['Location']['DisplayName'].find('webex')
-                            if location > -1:
+                            if event.json['Location']['DisplayName'].find('webex') > -1 or \
+                                    event.getBody().find('.webex.com/join') > -1:
                                 location = 'webex'
                             else:
                                 location = 'offline'
-                            print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + location + " " + event.getSubject().encode('utf-8'))
+                            if (len(sys.argv) > 1) and (sys.argv[1] == '--verbose'):
+                                print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + location + " " + event.getSubject().encode('utf-8') + event.getBody().encode('utf-8'))
+                                print(event.json)
+                            else:
+                                print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + location + " " + event.getSubject().encode('utf-8'))

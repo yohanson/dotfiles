@@ -1,0 +1,22 @@
+#!/bin/bash
+cmd=$1
+if [ $# -ne 2 ]; then
+	echo "Usage: $0 {start|save} {vmid|vmname}"
+	exit 1
+fi
+
+vmid=$(vboxmanage list vms | grep $2 | grep -o '{.*}')
+case $cmd in
+id)
+	echo $vmid
+	;;
+start)
+	vboxmanage startvm "$vmid"
+	;;
+stop)
+	vboxmanage controlvm "$vmid" acpipowerbutton
+	;;
+save)
+	vboxmanage controlvm "$vmid" savestate
+	;;
+esac

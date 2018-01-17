@@ -33,11 +33,11 @@ save_windowname()
 start_radio()
 {
     URL="$1"
-    firefox -P radio $URL &
+    $radio_browser_cmd $URL & #2>/dev/null &
     pid=$!
     winwait_sec=30
-    while ! winid=$(xdotool search --onlyvisible --pid $pid); do
-        echo "$winid"
+    while ! winid=$(xdotool search --pid $pid --classname --all 'Navigator'); do
+        echo "winid=$winid"
         sleep 1
         winwait_sec=$((winwait_sec-1))
         if [ $winwait_sec -eq 0 ]; then
@@ -46,20 +46,21 @@ start_radio()
         fi
     done
     echo $winid > $dir/winid
-    i3-msg "[id=$winid] move window to workspace 8:🎜"
+    i3-msg "[id=$winid] move window to workspace 8:🎜" > /dev/null
 }
 
 stop_radio()
 {
     winid=$(get_winid) || return $?
-    xdotool windowclose $winid && rm -f $dir/*
+    sendkey ctrl+w
+    save_windowname ''
 }
 
 sendkey()
 {
     key="$1"
     winid=$(get_winid) || return $?
-    xdotool key --window $winid $key
+    xdotool key --clearmodifiers --window $winid $key
 }
 
 state()
@@ -71,6 +72,9 @@ state()
         exit
     elif echo "$windowname" | grep -q "Яндекс\.\(Радио\|Музыке\)"; then
         echo "paused"
+        exit
+    elif echo "$windowname" | grep -q "^Mozilla Firefox"; then
+        echo "starting"
         exit
     else
         echo "playing"
@@ -95,6 +99,11 @@ title()
             exit
             ;;
 
+        "starting")
+            echo "Starting..." 
+            exit
+            ;;
+
         "paused")
             if $inside_i3blocks; then
                 if [ "$windowname_old" == "Реклама" ]; then
@@ -106,20 +115,16 @@ title()
                 elif [ -z "$windowname_old" ]; then
                     windowname_old='Radio is starting...'
                 fi
-                echo '<span color="#aaa">⏸</span><span font="11" face="PT Sans" color="#888"> '$windowname_old'</span>'
-            else
-                echo "$windowname_old"
             fi
+            echo "$windowname_old"
             exit
             ;;
 
         "playing")
-            $inside_i3blocks \
-                && echo '<span font="11" face="PT Sans" color="#aaa">▶️ '$windowname'</span>' \
-                || echo "$windowname"
+            echo "$windowname"
             if [ "$windowname" != "$windowname_old" ]; then
                 if [ "$windowname" == "Реклама" ] || [ "$windowname_old" == "Реклама" ]; then
-                    sendkey 0
+                    sendkey 0 # mute
                 fi
                 save_windowname "$windowname"
             fi
@@ -147,24 +152,13 @@ refresh_i3blocks()
     pkill -RTMIN+11 i3blocks
 }
 
-
-# Mouse Clicked in i3bar
-if [ "$BLOCK_BUTTON" != "" ]; then
-    # 1:left, 2:mid, 3:right, 4:scrollup, 5:scrolldown
-    case $BLOCK_BUTTON in
-        1) pause; sleep 0.1;;
-        3) next; sleep 1;;
-        4) vol up; exit 1;; # error to preserve i3bar title
-        5) vol down; exit 1;;
-    esac
-fi
-
 case $1 in
-    start|start-music)
-        if [ "$1" == 'start-music' ]; then
+    start)
+        if [ "$(basename $0)" == 'music_yamusic' ]; then
             URL=https://music.yandex.ru/
         else
-            URL=https://radio.yandex.ru/user/bomb-da-base
+            . ~/.config/my_scripts.conf
+            URL=https://radio.yandex.ru/user/$yandex_username
         fi
         start_radio "$URL"
         ;;
@@ -186,5 +180,9 @@ case $1 in
         if [ "$state" == "playing" ]; then
             pause
         fi
+        ;;
+    *)
+        commands=$(grep -A100 '^case \$1 in' $0 | grep -o '^\s*[-a-z\|]\+)' | tr '|)' '  ' | xargs | sed 's/ / | /g')
+        echo "Usage: `basename $0` { $commands }"
         ;;
 esac

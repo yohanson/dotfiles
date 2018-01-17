@@ -40,7 +40,7 @@ bindsym $mod+Return exec urxvt
 bindsym Mod1+F2 exec urxvt
 #bindsym Mod1+grave exec gmrun
 bindsym Mod1+grave             exec --no-startup-id bashrun2 || gmrun || dmenu_run
-bindsym Mod1+control+l         exec --no-startup-id enlock
+bindsym Mod1+control+l         exec --no-startup-id xautolock -locknow
 bindsym Print                  exec --no-startup-id screenshot.sh
 bindsym Shift+Print            exec --no-startup-id screenshot.sh current
 bindsym Mod4+Shift+Print       exec --no-startup-id screenshot.sh select
@@ -48,9 +48,9 @@ bindsym $mod+bracketleft       exec --no-startup-id vol down
 bindsym XF86AudioLowerVolume   exec --no-startup-id vol down
 bindsym $mod+bracketright      exec --no-startup-id vol up
 bindsym XF86AudioRaiseVolume   exec --no-startup-id vol up
-bindsym Mod1+control+r         exec radio start
-bindsym Mod1+control+p         exec --no-startup-id radio pause && pkill -RTMIN+11 i3blocks
-bindsym Mod1+control+backslash exec --no-startup-id radio next && pkill -RTMIN+11 i3blocks
+bindsym Mod1+control+r         exec music start yaradio
+bindsym Mod1+control+p         exec --no-startup-id music pause && pkill -RTMIN+11 i3blocks
+bindsym Mod1+control+backslash exec --no-startup-id music next && pkill -RTMIN+11 i3blocks
 bindsym Mod1+control+k         exec --no-startup-id snippet
 
 # kill focused window
@@ -208,11 +208,12 @@ assign [class="Slack"]            → $w3
 assign [instance="skypeforlinux"] → $w3
 assign [class="Claws-mail"]       → $w4
 assign [class="VirtualBox"]       → $w7
-assign [class="^radio.yandex.ru"] → $w8
+assign [class="Deadbeef"]         → $w8
 for_window [class="Astercti"] floating enable
 for_window [class="Gajim" window_role="roster"] floating enable, resize set 300px 1000px, [class="Gajim" window_role="roster"] move position 1000px 1px
 for_window [instance="bashrun2-run-dialog"] floating enable
 for_window [class="Gmrun"] move position 0px 0px
+for_window [class="xfreerdp"] floating disable
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
