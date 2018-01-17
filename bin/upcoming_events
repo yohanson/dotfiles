@@ -63,6 +63,10 @@ echo "$events" | while read line; do
         continue
     elif [ $seconds_left -lt $UPCOMING_RED_SECONDS ]; then
         color=#c88
+        if [ $seconds_left -lt 5 ] && [ $seconds_left -ge -5 ]; then # NOW
+            notify-send -i appointment-soon "$subject"
+            beep -f 2000
+        fi
     elif [ $seconds_left -lt $UPCOMING_YELLOW_SECONDS ]; then
         color=#cc8
         if ! grep -q "color='$color'" "$LAST_STATE_FILE"; then # just entered state "less than 3min left"
