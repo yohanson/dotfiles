@@ -16,16 +16,17 @@ stop()
 state()
 {
     pid=$(pidof deadbeef)
-    isplaying=$($binary --nowplaying-tf "%isplaying%" 2>/dev/null)
+    status=$($binary --nowplaying-tf "%isplaying%:%ispaused%" 2>/dev/null)
     if [ -z $pid ]; then
         echo "not running"
-        exit
-    elif [ -z $isplaying ]; then
-        echo "paused"
-        exit
-    else
+    elif [ "$status" == "1:" ]; then
         echo "playing"
+    elif [ "$status" == ":1" ]; then
+        echo "paused"
+    elif [ "$status" == ":" ]; then
+        echo "stopped"
     fi
+    exit
 }
 
 title()
@@ -35,7 +36,7 @@ title()
 
 pause()
 {
-    $binary --toggle-pause 2>/dev/null
+    $binary --play-pause 2>/dev/null
 }
 
 next()

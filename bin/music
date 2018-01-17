@@ -20,7 +20,11 @@ stop()
 
 state()
 {
-    cur_state=$(music_$player_type state)
+    if [ "$player_type" ]; then
+        cur_state=$(music_$player_type state)
+    else
+        cur_state='not running'
+    fi
     echo $cur_state
     [ "$cur_state" == 'not running' ] && return 1
     return 0
@@ -113,15 +117,7 @@ case $1 in
                 usage "$(basename $0) start" 3; exit 1;
         esac
         ;;
-    pause)
-        prev_state=$(state)
-        pause
-        if [ "$prev_state" == "playing" ]; then
-            refresh_i3blocks 0
-        else
-            refresh_i3blocks
-        fi
-        ;;
+    pause) pause; refresh_i3blocks ;;
     next)  next; refresh_i3blocks ;;
     stop)  stop ;;
     state) state ;;
