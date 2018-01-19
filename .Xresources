@@ -76,4 +76,4 @@ Rxvt.termName: rxvt
 Xautolock.locker: enlock
 Xautolock.time:   5
 Xautolock.notify: 10
-Xautolock.notifier: "notify-send '10 seconds to screen lock'"
+Xautolock.notifier: notify-send '10 seconds to screen lock'
