@@ -63,7 +63,10 @@ echo "$events" | while read line; do
         continue
     elif [ $seconds_left -lt $UPCOMING_RED_SECONDS ]; then
         color=#c88
-        if [ $seconds_left -lt 5 ] && [ $seconds_left -ge -5 ]; then # NOW
+        if [ $seconds_left -lt 11 ] && [ $seconds_left -gt 0 ]; then # NOW
+            while [ "$(seconds_left $time)" -gt 0 ]; do
+                sleep 1
+            done
             notify-send -i appointment-soon "$subject"
             beep -f 2000
         fi
