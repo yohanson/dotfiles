@@ -1,9 +1,10 @@
 #!/bin/bash
-SNIPPETS_DIR=$(dirname $(dirname $0))/snippets
+SNIPPETS_DIR=$HOME/snippets
 
 snippet_name=$(ls "$SNIPPETS_DIR" | dmenu -b -l 10 -p 'Snippet to copy: ')
 
 if [ "$snippet_name" ]; then
     snippet=$(cat $SNIPPETS_DIR/$snippet_name)
-    printf "%s" "$snippet" | xsel -i
+    printf "%s" "$snippet" | xsel -i -p
+    printf "%s" "$snippet" | xsel -i -b
 fi
