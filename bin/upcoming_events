@@ -72,11 +72,6 @@ echo "$events" | while read line; do
         fi
     elif [ $seconds_left -lt $UPCOMING_YELLOW_SECONDS ]; then
         color=#cc8
-        if ! grep -q "color='$color'" "$LAST_STATE_FILE"; then # just entered state "less than 3min left"
-            if [ "$location" == "webex" ]; then
-                vboxmanage startvm "IE9 - Win7" &
-            fi
-        fi
     fi
     if ! grep -q "$short_time" "$LAST_STATE_FILE"; then # time changed
         color=#8cc

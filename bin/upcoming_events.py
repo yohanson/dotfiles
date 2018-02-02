@@ -7,10 +7,14 @@ sys.path.append(o365libdir)
 url_base = 'https://outlook.office.com/owa/?'
 
 from O365 import *
+import re
 import json
 import time
 import urllib
 
+def hasWebexLink(string):
+    regex = re.compile('\.webex\.com/(join|\w+/j\.php\?MTID=)')
+    return re.search(regex, string) != None
 
 if __name__ == '__main__':
 	veh = open(o365libdir + '/pw/veh.pw','r').read()
@@ -48,11 +52,11 @@ if __name__ == '__main__':
                             request_template = { 'viewmodel' : 'ICalendarItemDetailsViewModelFactory', 'ItemID' : event.json['Id'] }
                             url = url_base + urllib.urlencode(request_template).replace('_', '%2B').replace('-', '%2F')
                             if event.json['Location']['DisplayName'].find('webex') > -1 or \
-                                    event.getBody().find('.webex.com/join') > -1:
+                                    hasWebexLink(event.getBody()):
                                 location = 'webex'
                             else:
                                 location = 'offline'
-                            if (len(sys.argv) > 1) and (sys.argv[1] == '--verbose'):
+                            if (len(sys.argv) > 1) and (sys.argv[1] == '--verbose' or sys.argv[1] == '-v'):
                                 print(time.strftime("%Y-%m-%dT%H:%M:%S", starttime_local) + " " + url + " " + location + " " + event.getSubject().encode('utf-8') + event.getBody().encode('utf-8'))
                                 print(event.json)
                             else:
