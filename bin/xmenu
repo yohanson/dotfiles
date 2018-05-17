@@ -1,0 +1,17 @@
+#!/bin/bash
+
+eval $(xdotool getmouselocation --shell)
+. $HOME/.config/my_scripts.conf
+
+let "Y-=100"
+let "X-=200"
+
+if [ $# -gt 1 ]; then
+    while [ $# -ge 1 ]; do
+        item=$(echo "$1" | tr : .)
+        echo "$item:echo "$item"";
+        shift
+    done
+else
+    cat
+fi | 9menu -popup -file - -geometry 0x0+$X+$Y
