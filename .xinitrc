@@ -17,8 +17,7 @@ xrdb -load ~/.Xresources
 
 . $HOME/.config/my_scripts.conf
 
-xrandr --output VGA-0 --rotate left --pos 0x0 \
-       --output DVI-I-1 --pos 1080x$TOP_OFFSET --primary
+xrandr --output VGA-0 --rotate normal --output DVI-I-1 --right-of VGA-0 --primary
 
 setxkbmap -layout us,ru -option grp:ctrl_shift_toggle,grp_led:scroll,compose:caps,lv3:ralt_switch,misc:typo,nbsp:level3n
 
