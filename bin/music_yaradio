@@ -157,9 +157,9 @@ case $1 in
         if [ "$(basename $0)" == 'music_yamusic' ]; then
             URL=https://music.yandex.ru/
         else
-            . ~/.config/my_scripts.conf
             URL=https://radio.yandex.ru/user/$yandex_username
         fi
+        . ~/.config/my_scripts.conf
         start_radio "$URL"
         ;;
     pause)
