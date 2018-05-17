@@ -1,6 +1,6 @@
 #!/bin/bash
-
-[ "$BLOCK_BUTTON" == "1" ] && xdg-open http://weather.ngs.ru > /dev/null
+WEATHER_URL='https://pogoda.ngs.ru'
+[ "$BLOCK_BUTTON" == "1" ] && xdg-open "$WEATHER_URL" > /dev/null
 
 ICONSIZE=16
 WEATHERCACHE=$XDG_RUNTIME_DIR/weather-cache$1
@@ -20,7 +20,7 @@ SUN_COLOR='#FF0'
 MOON_COLOR='#FEFCD7'
 RAIN_COLOR='#034aec'
 
-mainpage=$(curl -s pogoda.ngs.ru | grep -A 50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
+mainpage=$(curl -s "$WEATHER_URL" | grep -A 50 icon-weather-big | sed 's/^\s*//g; s/&nbsp;/ /g; s/\s\+/ /g')
 temp=$(echo "$mainpage" | grep value__degree | sed 's/^.*"value__main">\([^<]\+\)<.*$/\1/; s/&minus;/-/; s,\+,,; y/,/./; s/$/°/')
 
 descr=$(echo "$mainpage" | grep value-description | sed 's/<[^>]*>//g')
@@ -143,4 +143,4 @@ $PANGO && echo "$temp$symbol" | tee "$WEATHERCACHE" && exit
 echo "<txt>$temp</txt>" | tee "$WEATHERCACHE"
 echo -e "<tool>$current_descr</tool>" | tee -a "$WEATHERCACHE"
 echo "<img>/usr/share/icons/gnome/${ICONSIZE}x$ICONSIZE/status/$image.png</img>" | tee -a "$WEATHERCACHE"
-echo "<click>xdg-open http://pogoda.ngs.ru/</click>" | tee -a "$WEATHERCACHE"
+echo "<click>xdg-open $WEATHER_URL</click>" | tee -a "$WEATHERCACHE"
