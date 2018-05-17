@@ -1,10 +1,27 @@
 #!/bin/bash
 SNIPPETS_DIR=$HOME/snippets
 
-snippet_name=$(ls "$SNIPPETS_DIR" | dmenu -b -l 10 -p 'Snippet to copy: ')
-
-if [ "$snippet_name" ]; then
-    snippet=$(cat $SNIPPETS_DIR/$snippet_name)
-    printf "%s" "$snippet" | xsel -i -p
-    printf "%s" "$snippet" | xsel -i -b
+if [ "$1" ]; then
+    if [ "$1" == "--help" ]; then
+        echo "Usage: $0 [snippet_name]"
+        echo "  snippet_name: Name of a file from $SNIPPETS_DIR/"
+        echo "                If specified, snippet is printed to stdout."
+        echo "                Current list:"
+        for snippet_name in $SNIPPETS_DIR/*; do
+            printf "                  %s\n" "$(basename $snippet_name)"
+        done
+        exit
+    fi
+    snippet_name="$1"
+    if [ ! -e "$SNIPPETS_DIR/$snippet_name" ]; then
+        exit 1
+    fi
+    cat "$SNIPPETS_DIR/$snippet_name"
+else
+    snippet_name=$(ls "$SNIPPETS_DIR" | dmenu -b -l 10 -p 'Snippet to copy: ')
+    if [ "$snippet_name" ]; then
+        snippet=$(cat $SNIPPETS_DIR/$snippet_name)
+        printf "%s" "$snippet" | xsel -i -p
+        printf "%s" "$snippet" | xsel -i -b
+    fi
 fi
