@@ -25,7 +25,7 @@ temp=$(echo "$mainpage" | grep value__degree | sed 's/^.*"value__main">\([^<]\+\
 
 descr=$(echo "$mainpage" | grep value-description | sed 's/<[^>]*>//g')
 wind=$(echo "$mainpage" | grep -A4 wind | tail -n1 | sed 's/<[^>]*>//g')
-pressure=$(echo "$mainpage" | grep icon-pressure | sed 's/^.*title="\([0-9]\+ ..\)".*$/\1/')
+pressure=$(echo "$mainpage" | grep icon-pressure | sed -r 's/^.*title="([0-9]+)[,\.0-9]* ?(\S+)".*$/\1\2/')
 humidity=$(echo "$mainpage" | grep icon-humidity | sed 's/^.*"\([0-9]\+%\)".*$/\1/')
 riseset=$(echo "$mainpage" | grep -A7 today-panel__info__main__item)
 stateicon=$(echo "$mainpage" | head -n1 | sed 's/^.*icon-weather-big \([^"]\+\)".*$/\1/')
